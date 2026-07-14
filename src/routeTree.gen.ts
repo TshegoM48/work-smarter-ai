@@ -9,9 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResumeRouteImport } from './routes/resume'
+import { Route as InterviewRouteImport } from './routes/interview'
+import { Route as EmailRouteImport } from './routes/email'
+import { Route as CoverLetterRouteImport } from './routes/cover-letter'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAiRouteImport } from './routes/api/ai'
 
+const ResumeRoute = ResumeRouteImport.update({
+  id: '/resume',
+  path: '/resume',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InterviewRoute = InterviewRouteImport.update({
+  id: '/interview',
+  path: '/interview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailRoute = EmailRouteImport.update({
+  id: '/email',
+  path: '/email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoverLetterRoute = CoverLetterRouteImport.update({
+  id: '/cover-letter',
+  path: '/cover-letter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -25,32 +55,109 @@ const ApiAiRoute = ApiAiRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chat': typeof ChatRoute
+  '/cover-letter': typeof CoverLetterRoute
+  '/email': typeof EmailRoute
+  '/interview': typeof InterviewRoute
+  '/resume': typeof ResumeRoute
   '/api/ai': typeof ApiAiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/chat': typeof ChatRoute
+  '/cover-letter': typeof CoverLetterRoute
+  '/email': typeof EmailRoute
+  '/interview': typeof InterviewRoute
+  '/resume': typeof ResumeRoute
   '/api/ai': typeof ApiAiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chat': typeof ChatRoute
+  '/cover-letter': typeof CoverLetterRoute
+  '/email': typeof EmailRoute
+  '/interview': typeof InterviewRoute
+  '/resume': typeof ResumeRoute
   '/api/ai': typeof ApiAiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/ai'
+  fullPaths:
+    | '/'
+    | '/chat'
+    | '/cover-letter'
+    | '/email'
+    | '/interview'
+    | '/resume'
+    | '/api/ai'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/ai'
-  id: '__root__' | '/' | '/api/ai'
+  to:
+    | '/'
+    | '/chat'
+    | '/cover-letter'
+    | '/email'
+    | '/interview'
+    | '/resume'
+    | '/api/ai'
+  id:
+    | '__root__'
+    | '/'
+    | '/chat'
+    | '/cover-letter'
+    | '/email'
+    | '/interview'
+    | '/resume'
+    | '/api/ai'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChatRoute: typeof ChatRoute
+  CoverLetterRoute: typeof CoverLetterRoute
+  EmailRoute: typeof EmailRoute
+  InterviewRoute: typeof InterviewRoute
+  ResumeRoute: typeof ResumeRoute
   ApiAiRoute: typeof ApiAiRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/resume': {
+      id: '/resume'
+      path: '/resume'
+      fullPath: '/resume'
+      preLoaderRoute: typeof ResumeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interview': {
+      id: '/interview'
+      path: '/interview'
+      fullPath: '/interview'
+      preLoaderRoute: typeof InterviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email': {
+      id: '/email'
+      path: '/email'
+      fullPath: '/email'
+      preLoaderRoute: typeof EmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cover-letter': {
+      id: '/cover-letter'
+      path: '/cover-letter'
+      fullPath: '/cover-letter'
+      preLoaderRoute: typeof CoverLetterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -70,6 +177,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChatRoute: ChatRoute,
+  CoverLetterRoute: CoverLetterRoute,
+  EmailRoute: EmailRoute,
+  InterviewRoute: InterviewRoute,
+  ResumeRoute: ResumeRoute,
   ApiAiRoute: ApiAiRoute,
 }
 export const routeTree = rootRouteImport

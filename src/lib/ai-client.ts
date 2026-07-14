@@ -1,9 +1,21 @@
-export type AiMode = "email" | "summarize" | "plan" | "research" | "chat";
+export type AiMode =
+  | "email"
+  | "summarize"
+  | "plan"
+  | "research"
+  | "chat"
+  | "resume"
+  | "cover-letter"
+  | "interview";
 
 export interface AiOptions {
   tone?: string;
   audience?: string;
   subject?: string;
+  emailType?: string;
+  jobTitle?: string;
+  company?: string;
+  jobDescription?: string;
   history?: { role: "user" | "assistant"; content: string }[];
 }
 
