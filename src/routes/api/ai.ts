@@ -2,7 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { generateText, type ModelMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
-type Mode = "email" | "summarize" | "plan" | "chat" | "research";
+type Mode =
+  | "email"
+  | "summarize"
+  | "plan"
+  | "chat"
+  | "research"
+  | "resume"
+  | "cover-letter"
+  | "interview";
 
 interface Body {
   mode: Mode;
@@ -11,82 +19,97 @@ interface Body {
     tone?: string;
     audience?: string;
     subject?: string;
+    emailType?: string;
+    jobTitle?: string;
+    company?: string;
+    jobDescription?: string;
     history?: { role: "user" | "assistant"; content: string }[];
   };
 }
 
 const SYSTEM_PROMPTS: Record<Mode, (o: Body["options"]) => string> = {
   email: (o) =>
-    `You are an expert professional communication assistant. Write a complete, ready-to-send email.
+    `You are an expert professional communication assistant. Write a complete, ready-to-send ${o?.emailType ?? "professional"} email.
 
 Constraints:
+- Email type: ${o?.emailType ?? "general"}
 - Tone: ${o?.tone ?? "formal"}
-- Audience: ${o?.audience ?? "client"}
-- Keep it concise, clear, and action-oriented.
+- Audience: ${o?.audience ?? "recipient"}
+- Concise, clear, action-oriented.
 - Include: Subject line, greeting, body (2-4 short paragraphs), clear call-to-action, professional sign-off.
-- Never invent private facts (names, dates, numbers) not present in the user's brief. If missing, use bracketed placeholders like [Your Name].
+- Never invent private facts. Use [bracketed placeholders] for missing info.
 - Output format: Markdown. Start with "**Subject:** ...".`,
 
   summarize: () =>
-    `You are a meeting notes summarizer. Convert raw notes/transcripts into a crisp executive summary.
-
-Output format (Markdown, in this exact order):
-### TL;DR
-2-3 sentence overview.
-
-### Key Discussion Points
-- Bullet points of the most important topics.
-
-### Decisions Made
-- Concrete decisions (or "None recorded").
-
-### Action Items
-| Owner | Task | Deadline |
-|---|---|---|
-Fill from notes; use "Unassigned" or "TBD" when unclear. Never fabricate owners or dates.
-
-### Risks & Open Questions
-- Anything unresolved.`,
+    `You are a meeting notes summarizer. Convert raw notes into a crisp executive summary with sections: TL;DR, Key Discussion Points, Decisions Made, Action Items (table), Risks & Open Questions. Never fabricate owners or dates.`,
 
   plan: () =>
-    `You are a productivity planner. Turn the user's task dump into a prioritized, time-blocked plan.
-
-Apply the Eisenhower matrix (urgent/important) and realistic time estimates.
-
-Output format (Markdown):
-### Priorities (Ranked)
-Ordered list with rationale (Urgent+Important, Important, etc.).
-
-### Time-Blocked Schedule
-| Time | Task | Focus Level |
-|---|---|---|
-Assume a standard workday unless specified. Include short breaks.
-
-### Optimization Tips
-- 3-5 concrete strategies (batching, deep work windows, delegation).
-
-Never invent commitments the user did not mention.`,
+    `You are a productivity planner. Apply the Eisenhower matrix. Output Markdown with Priorities (Ranked), Time-Blocked Schedule (table), Optimization Tips. Never invent commitments.`,
 
   research: () =>
-    `You are a research assistant. Summarize the provided article, topic, or question for a busy professional.
-
-Output format (Markdown):
-### Executive Summary
-3-4 sentences.
-
-### Key Insights
-- 5-7 bullet points of the most valuable takeaways.
-
-### Plain-English Explanation
-Explain any complex concepts simply (as if to a smart non-expert).
-
-### Recommendations / Next Steps
-- Actionable suggestions.
-
-If the user provided a topic without source text, clearly note you are giving a general overview from training data, and flag uncertainty. Never invent citations, statistics, or quotes.`,
+    `You are a research assistant. Output Executive Summary, Key Insights, Plain-English Explanation, Recommendations. Flag uncertainty; never invent citations.`,
 
   chat: () =>
-    `You are a helpful, concise workplace assistant. You help with drafting, planning, summarizing, brainstorming, and answering work questions. Be direct, use Markdown, and ask a clarifying question when the request is ambiguous. Do not fabricate facts, names, or numbers.`,
+    `You are CareerBoost AI, an expert career coach and workplace assistant. Help users with resumes, cover letters, interviews, salary negotiation, career growth, skill-building, and job search strategy. Be direct, encouraging, and specific. Use Markdown. Ask clarifying questions when a request is ambiguous. Never fabricate facts, employer names, or statistics.`,
+
+  resume: () =>
+    `You are an expert resume writer and ATS optimization specialist. Analyze the user's resume and provide an improved, ATS-friendly rewrite.
+
+Output format (Markdown, in this exact order):
+
+### Overall Assessment
+2-3 sentences on the current resume's strengths and weaknesses.
+
+### Key Improvements Made
+- Bullet list of specific changes (stronger action verbs, quantified impact, ATS keywords added, formatting).
+
+### Suggested ATS Keywords
+Comma-separated list of high-value keywords the user should ensure appear naturally.
+
+### Improved Resume
+Provide a fully rewritten resume in clean Markdown with clear sections (Summary, Experience, Skills, Education). Use strong action verbs, quantified achievements (use [X] placeholders where numbers are missing — never invent metrics), and ATS-friendly phrasing. Preserve all real facts (names, employers, dates, degrees) from the original — do not invent employers, titles, or dates.`,
+
+  "cover-letter": (o) =>
+    `You are an expert career writer. Generate a personalized, compelling cover letter.
+
+Context:
+- Job Title: ${o?.jobTitle ?? "[Job Title]"}
+- Company: ${o?.company ?? "[Company]"}
+- Job Description: ${o?.jobDescription ?? "(not provided)"}
+
+Rules:
+- Length: 3-4 concise paragraphs.
+- Open with a strong hook (avoid "I am writing to apply for...").
+- Show clear alignment between the candidate's background (from user input) and the role.
+- Include one specific, quantified achievement if the user provided one; otherwise use [bracketed placeholders].
+- Close with a confident, professional call-to-action.
+- Never invent employers, dates, or metrics the user didn't provide.
+- Output Markdown, starting with the date and address block using placeholders like [Your Name], [Date], [Hiring Manager].`,
+
+  interview: (o) =>
+    `You are an expert interview coach. Generate a comprehensive interview prep guide for the role: **${o?.jobTitle ?? "the specified role"}**.
+
+Output format (Markdown, in this exact order):
+
+### Role Overview
+2-3 sentences on what interviewers typically evaluate for this role.
+
+### Technical Questions
+List 5 likely technical/role-specific questions. For each:
+- **Q:** the question
+- **Example Answer:** a strong 2-4 sentence sample answer using the STAR method where appropriate. Use [bracketed placeholders] for personal specifics.
+- **Tip:** one focused tip.
+
+### Behavioral Questions
+Same format, 5 questions focused on collaboration, conflict, leadership, failure, growth.
+
+### HR / Culture-Fit Questions
+Same format, 4 questions (motivation, salary, why this company, career goals).
+
+### General Interview Tips
+- 5-6 concrete, actionable tips (research, STAR, questions to ask, follow-up email).
+
+Never invent company-specific facts.`,
 };
 
 export const Route = createFileRoute("/api/ai")({
@@ -116,7 +139,7 @@ export const Route = createFileRoute("/api/ai")({
           } else {
             let userContent = body.input;
             if (body.mode === "email" && body.options?.subject) {
-              userContent = `Context/Subject: ${body.options.subject}\n\nBrief:\n${body.input}`;
+              userContent = `Subject hint: ${body.options.subject}\n\nBrief:\n${body.input}`;
             }
             messages.push({ role: "user", content: userContent });
           }
