@@ -128,7 +128,10 @@ export const Route = createFileRoute("/api/ai")({
           const gateway = createLovableAiGatewayProvider(key);
           const model = gateway("google/gemini-3-flash-preview");
 
-          const system = SYSTEM_PROMPTS[body.mode](body.options);
+          const today = new Date().toLocaleDateString("en-US", {
+            weekday: "long", year: "numeric", month: "long", day: "numeric",
+          });
+          const system = `Today's date is ${today}. Use this whenever the user asks about the date, day, year, or anything time-relative.\n\n${SYSTEM_PROMPTS[body.mode](body.options)}`;
 
           const messages: ModelMessage[] = [];
           if (body.mode === "chat" && body.options?.history) {
