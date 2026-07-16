@@ -49,13 +49,15 @@ An AI-powered job seeker toolkit built to help users polish resumes, write stand
 
 3. **Configure environment variables**
 
-   Create a `.env` file in the project root and add:
+   The app uses Lovable AI Gateway for the AI features. The project already has a server-side `LOVABLE_API_KEY` configured on Lovable Cloud, so no manual setup is needed there.
+
+   For local development, create a `.env` file in the project root and add:
 
    ```bash
-   VITE_LOVABLE_API_KEY=your_lovable_api_key
+   LOVABLE_API_KEY=your_lovable_api_key
    ```
 
-   The server functions read the key from `process.env.VITE_LOVABLE_API_KEY` inside the request handler. If no key is configured, the AI gateway will return a clear error message and the app will display it in the UI.
+   > **Important:** `LOVABLE_API_KEY` is read only on the server. Never add the `VITE_` prefix — that would expose the key to the browser. If no key is configured, the AI request will fail and the UI will show the error.
 
 4. **Run the development server**
 
